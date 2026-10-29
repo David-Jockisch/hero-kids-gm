@@ -1,0 +1,9 @@
+{
+  "name": "hero-kids-gm",
+  "version": "2.0.0",
+  "private": true,
+  "scripts": {
+    "test": "node --test beta/tests/core.test.cjs beta/tests/app.test.cjs",
+    "check": "node --check beta/app.js && node --check beta/core.js && node --check beta/overlay.js && node --check beta/table-link.mjs && node --check beta/sw.js"
+  }
+}

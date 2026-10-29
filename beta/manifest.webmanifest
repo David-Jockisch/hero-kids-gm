@@ -1,0 +1,26 @@
+{
+  "name": "Hero Kids · The GM's Table",
+  "description": "An iPad game master desk and live player display for Hero Kids",
+  "short_name": "Hero Kids",
+  "id": "./",
+  "background_color": "#f5f3ec",
+  "start_url": "./",
+  "theme_color": "#172c28",
+  "icons": [
+    {
+      "purpose": "any",
+      "src": "icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "purpose": "any maskable",
+      "src": "icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any"
+}
