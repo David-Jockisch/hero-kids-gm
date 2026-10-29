@@ -1,0 +1,132 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "tableDisplays": {
+      "$owner": {
+        "$room": {
+          ".read": "auth != null",
+          ".write": "auth != null && auth.uid === $owner && $room.matches(/^[a-f0-9]{32}$/)",
+          ".validate": "newData.hasChildren(['version','campaign','encounter','round','turn','showRound','announcement','hidden','updatedAt']) && newData.child('version').val() === 1 && newData.child('updatedAt').val() <= now + 5000 && newData.child('updatedAt').val() >= now - 30000",
+          "version": {
+            ".validate": "newData.val() === 1"
+          },
+          "campaign": {
+            ".validate": "newData.isString() && newData.val().length <= 100"
+          },
+          "encounter": {
+            ".validate": "newData.isString() && newData.val().length <= 150"
+          },
+          "round": {
+            ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 999 && newData.val() % 1 == 0"
+          },
+          "turn": {
+            ".validate": "newData.val() === 'Heroes' || newData.val() === 'Monsters'"
+          },
+          "showRound": {
+            ".validate": "newData.isBoolean()"
+          },
+          "announcement": {
+            ".validate": "newData.isString() && newData.val().length <= 200"
+          },
+          "hidden": {
+            ".validate": "newData.isBoolean()"
+          },
+          "updatedAt": {
+            ".validate": "newData.isNumber()"
+          },
+          "heroes": {
+            ".validate": "newData.hasChildren()",
+            "$index": {
+              ".validate": "newData.hasChildren(['id','name','maxHp','hp','role','condition','color']) && newData.child('maxHp').val() >= 1 && newData.child('hp').val() <= newData.child('maxHp').val() && $index.matches(/^(0|[1-9][0-9]?|1[0-9]{2})$/)",
+              "id": {
+                ".validate": "newData.isString() && newData.val().length <= 80"
+              },
+              "name": {
+                ".validate": "newData.isString() && newData.val().length <= 100"
+              },
+              "role": {
+                ".validate": "newData.isString() && newData.val().length <= 80"
+              },
+              "condition": {
+                ".validate": "newData.isString() && newData.val().length <= 80"
+              },
+              "color": {
+                ".validate": "newData.isString() && newData.val().length <= 20"
+              },
+              "hp": {
+                ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 30 && newData.val() % 1 == 0"
+              },
+              "maxHp": {
+                ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 30 && newData.val() % 1 == 0"
+              },
+              "$other": {
+                ".validate": false
+              }
+            }
+          },
+          "enemies": {
+            ".validate": "newData.hasChildren()",
+            "$index": {
+              ".validate": "newData.hasChildren(['id','name','maxHp','hp','role','condition','color']) && newData.child('maxHp').val() >= 1 && newData.child('hp').val() <= newData.child('maxHp').val() && $index.matches(/^(0|[1-9][0-9]?|1[0-9]{2})$/)",
+              "id": {
+                ".validate": "newData.isString() && newData.val().length <= 80"
+              },
+              "name": {
+                ".validate": "newData.isString() && newData.val().length <= 100"
+              },
+              "role": {
+                ".validate": "newData.isString() && newData.val().length <= 80"
+              },
+              "condition": {
+                ".validate": "newData.isString() && newData.val().length <= 80"
+              },
+              "color": {
+                ".validate": "newData.isString() && newData.val().length <= 20"
+              },
+              "hp": {
+                ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 30 && newData.val() % 1 == 0"
+              },
+              "maxHp": {
+                ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 30 && newData.val() % 1 == 0"
+              },
+              "$other": {
+                ".validate": false
+              }
+            }
+          },
+          "dice": {
+            ".validate": "newData.hasChildren(['label','result','at'])",
+            "label": {
+              ".validate": "newData.isString() && newData.val().length <= 100"
+            },
+            "result": {
+              ".validate": "newData.isString() && newData.val().length <= 100"
+            },
+            "at": {
+              ".validate": "newData.isNumber() && newData.val() >= 0"
+            },
+            "attack": {
+              ".validate": "newData.hasChildren()",
+              "$index": {
+                ".validate": "$index.matches(/^(0|[1-9]|1[0-9])$/) && newData.isNumber() && newData.val() >= 1 && newData.val() <= 6 && newData.val() % 1 == 0"
+              }
+            },
+            "defense": {
+              ".validate": "newData.hasChildren()",
+              "$index": {
+                ".validate": "$index.matches(/^(0|[1-9]|1[0-9])$/) && newData.isNumber() && newData.val() >= 1 && newData.val() <= 6 && newData.val() % 1 == 0"
+              }
+            },
+            "$other": {
+              ".validate": false
+            }
+          },
+          "$other": {
+            ".validate": false
+          }
+        }
+      }
+    }
+  }
+}

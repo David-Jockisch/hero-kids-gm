@@ -1,31 +1,28 @@
-# Hero Kids GM Journal — v0.1
+# Hero Kids GM Companion
 
-Unofficial, fan-made Hero Kids tabletop companion. No official adventures, characters, artwork, or copyrighted rulebook text are included.
+Unofficial, fan-made Hero Kids companion. No official adventures, characters, artwork, or copyrighted rulebook text are bundled.
 
-## Install on GitHub Pages
-1. Extract the ZIP.
-2. Upload **all files** to the root of a GitHub repository (or a folder configured for Pages).
-3. Under **Settings → Pages**, deploy from the main branch/root.
-4. Open the Pages address on your iPad. In Safari choose **Share → Add to Home Screen**.
-5. Open the installed app once online; it caches app files for offline use. Web fonts may fall back to local fonts offline.
+## Version 2 beta — The GM’s Table
 
-## What's included
-- Ongoing campaign, saved locally in the browser
-- Player-specific hero roster, switch active hero at any time
-- Hero health and basic dice stats
-- Enemy templates and live encounter tracker
-- Digital dice roller, physical dice input and attack-versus-defense resolution
-- Quick Play, manual adventure and encounter notes
-- Session journal and JSON backup/import
-- Mobile-friendly fantasy interface
+[Open the iPad-first remake](https://david-jockisch.github.io/hero-kids-gm/beta/)
 
-## What's next
-- PDF adventure importing (requires sample PDF and testing)
-- Official character and monster data entry from your owned materials
-- OBS Browser Source overlay + network synchronization
+The new app lives in `beta/` for hands-on iPad and OBS testing. It includes a session desk, hero roster, enemy templates, health and conditions, encounter turns, physical/digital dice, adventure scenes, journal, undo, backups, and a live read-only player display through Firebase Realtime Database. Both a transparent OBS overlay and a full encounter view are available.
 
-## Important
-- This version stores data in **localStorage** on the current device. Export backups regularly. Browser data deletion can erase your campaign.
-- No accounts or cloud sync. Other devices will not see the same game automatically.
-- Hero Kids has multiple editions/printings; check your own rulebook and character cards. The app's simplified quick reference is editable in future versions.
-- Do not publish or distribute copyrighted adventure PDF content in a public GitHub repository.
+See [beta/README.md](beta/README.md) for installation, OBS setup, data boundaries, Firebase configuration, limitations, and the next stages.
+
+The original v0.1 app remains at [the main site](https://david-jockisch.github.io/hero-kids-gm/). Both versions store campaigns in the current browser; campaigns do not synchronize between devices. The new Firebase service synchronizes only the selected player display, not campaign backups.
+
+## Checks
+
+No frontend dependency installation or build is required.
+
+```text
+npm test
+npm run check
+```
+
+App checks run on pull requests and changes to main. Firebase rules are stored in `database.rules.json` for the dedicated `hero-kids-gm-companion` project. No service account or admin credentials belong in this repository.
+
+## Upcoming work
+
+Validate on a real iPad/OBS table, then promote the remake to the main URL. Adventure PDF importing, portraits/maps, and expanded preparation tools will follow. Keep owned adventure PDFs and extracted content out of this public repository.
