@@ -129,4 +129,4 @@ window.addEventListener('hashchange',()=>{const next=location.hash.slice(1);if(n
 window.addEventListener('online',()=>{$('#connection').textContent='Internet available';broadcast();});
 window.addEventListener('offline',()=>{$('#connection').textContent='Offline · device saved';});
 page=navs.some(x=>x[0]===location.hash.slice(1))?location.hash.slice(1):'session';render();broadcast();
-if('serviceWorker' in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('./sw.js').catch(()=>toast('Offline caching is unavailable in this browser.'));
+if('serviceWorker' in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).catch(()=>toast('Offline caching is unavailable in this browser.'));
