@@ -15,9 +15,9 @@ window.getDisplaySnapshot = () => HK.project(db);
 try {channel = new BroadcastChannel('hero-kids-display-v2'); channel.onmessage = e => {if(e.data?.type === 'request') broadcast();};} catch {}
 function toast(message) {clearTimeout(toastTimer); $('#toast').textContent = message; $('#toast').hidden = false; toastTimer = setTimeout(()=>$('#toast').hidden = true, 4500);}
 function broadcast() {channel?.postMessage({type:'snapshot',data:HK.project(db),at:Date.now()}); window.TableLink?.publish(HK.project(db));}
-function persist() {
+function persist(share = true) {
   if (storageIssue) {toast('Save paused. Recover your previous data from Settings first.'); return false;}
-  try {localStorage.setItem(KEY, JSON.stringify(db)); $('#saveState').textContent = 'Saved on this device'; broadcast(); return true;}
+  try {localStorage.setItem(KEY, JSON.stringify(db)); $('#saveState').textContent = 'Saved on this device'; if(share)broadcast(); return true;}
   catch {$('#saveState').textContent = 'Not saved — export a backup'; toast('Device storage is full or unavailable. Export a backup now.'); return false;}
 }
 function change(fn, message = '', repaint = true) {undoStack.push(JSON.stringify(db)); if(undoStack.length > 30) undoStack.shift(); fn(); persist(); if(repaint)render(); if(message) toast(message);}
@@ -40,7 +40,7 @@ function session() {
   const party = active(), e = db.encounter;
   return heading('YOUR NEXT GREAT STORY','The adventure is yours.','Everything you need at the table, right where you need it.',button('＋ Add enemy','pick-enemy','','dark')) +
     `<section class="encounter-banner"><div class="banner-art" aria-hidden="true"><span>✦</span><svg viewBox="0 0 160 90"><path d="M0 90 42 25 61 55 98 0 160 90Z"/><path d="m83 23 15-23 16 24-17-6Z" class="snow"/><path d="M0 90 24 50 50 90M110 90l25-40 25 40"/></svg></div><div><span class="eyebrow">AT THE TABLE</span><h2>${esc(e.name)}</h2><button class="text-button banner-edit" data-action="encounter-name">Rename encounter ↗</button></div><div class="turn-block"><span class="eyebrow">ROUND</span><strong>${e.round.toString().padStart(2,'0')}</strong></div><div class="turn-next"><span class="pill">● ${esc(e.turn)} act</span>${button(e.turn==='Heroes'?'Monsters’ turn →':'Next round →','next-turn','','gold')}</div></section>
-    <div class="desk-grid"><div class="desk-main"><section>${sectionHead('BRAVE SOULS','The adventuring party',button('Manage roster ↗','navigate','data-page="heroes"','quiet small'))}<div class="party-grid">${party.length?party.map(h=>card(h,'hero')).join(''):empty('Your heroes belong here','Add your players’ heroes, then activate one hero for each player.',button('＋ Create a hero','character','data-type="hero"','dark'))}</div></section><section class="enemy-section">${sectionHead('ON THE OTHER SIDE','The encounter',`<span class="count">${e.foes.filter(f=>f.hp>0).length} remaining</span>`)}<div class="party-grid">${e.foes.length?e.foes.map(f=>card(f,'foe')).join(''):empty('A quiet moment…','Bring in an enemy from your bestiary when the story calls for it.',button('＋ Add enemies','pick-enemy','','quiet'))}</div></section><section class="panel notes-panel">${sectionHead('FOR YOUR EYES ONLY','GM notes')}<label class="sr-only" for="encounterNote">Encounter GM notes</label><textarea id="encounterNote" data-save="encounter-note" placeholder="The clue behind the waterfall. A voice for the goblin. The reward waiting at the end…">${esc(e.note)}</textarea><small>Saved when you leave this field. Never sent to the player display.</small></section></div><aside class="desk-aside">${dicePanel()}<section class="panel activity">${sectionHead('THE STORY SO FAR','Encounter log')}${e.log.length?`<ol>${e.log.slice(0,8).map(l=>`<li><span>${esc(l.time)}</span>${esc(l.message)}</li>`).join('')}</ol>`:'<p class="muted">Health changes, turns, and dice results will appear here.</p>'}<div class="toolbar">${button('New encounter','new-encounter','','quiet small')}${button('Heal party','heal-party','','quiet small')}</div></section></aside></div>`;
+    <div class="desk-grid"><div class="desk-main"><section>${sectionHead('BRAVE SOULS','The adventuring party',button('Manage roster ↗','navigate','data-page="heroes"','quiet small'))}<div class="party-grid">${party.length?party.map(h=>card(h,'hero')).join(''):empty('Your heroes belong here','Add your players’ heroes, then activate one hero for each player.',button('＋ Create a hero','character','data-type="hero"','dark'))}</div></section><section class="enemy-section">${sectionHead('ON THE OTHER SIDE','The encounter',`<span class="count">${e.foes.filter(f=>f.hp>0).length} remaining</span>`)}<div class="party-grid">${e.foes.length?e.foes.map(f=>card(f,'foe')).join(''):empty('A quiet moment…','Bring in an enemy from your bestiary when the story calls for it.',button('＋ Add enemies','pick-enemy','','quiet'))}</div></section><section class="panel notes-panel">${sectionHead('FOR YOUR EYES ONLY','GM notes')}<label class="sr-only" for="encounterNote">Encounter GM notes</label><textarea id="encounterNote" data-save="encounter-note" placeholder="The clue behind the waterfall. A voice for the goblin. The reward waiting at the end…">${esc(e.note)}</textarea><small>Saved as you type. Never sent to the player display.</small></section></div><aside class="desk-aside">${dicePanel()}<section class="panel activity">${sectionHead('THE STORY SO FAR','Encounter log')}${e.log.length?`<ol>${e.log.slice(0,8).map(l=>`<li><span>${esc(l.time)}</span>${esc(l.message)}</li>`).join('')}</ol>`:'<p class="muted">Health changes, turns, and dice results will appear here.</p>'}<div class="toolbar">${button('New encounter','new-encounter','','quiet small')}${button('Heal party','heal-party','','quiet small')}</div></section></aside></div>`;
 }
 let diceDraft = {attackMode:'digital',defenseMode:'physical',attackCount:2,defenseCount:1,attackPhysical:4,defensePhysical:3,attacker:'',target:''};
 function dicePanel() {
@@ -115,13 +115,24 @@ const actions = {
   connect:()=>window.TableLink?.connect?.()||toast('Firebase setup is pending. See connection settings.'),
   'connection-settings':()=>modal('Your table connection',`<p>Your iPad controls the game. Firebase Realtime Database delivers the selected player display to OBS over the internet.</p><p>The link is read-only: anyone with the URL can view the display, but cannot change health, turns, or notes.</p><p>Use <strong>End table link</strong> to revoke a shared link. A new connection creates a fresh link.</p><p class="muted">Core gameplay is saved in this browser. Cloud connection status is shown on the Player display screen. The local preview works between tabs in this browser.</p>`)
 };
+let editingField;
+function saveField(el) {
+  const value=el.value;
+  let target,key;
+  if(el.dataset.save==='encounter-note'){target=db.encounter;key='note';}
+  if(el.dataset.save==='announcement'){target=db.display;key='announcement';}
+  if(el.dataset.save==='adventure-status'){target=db.adventures.find(x=>x.id===el.dataset.id);key='status';}
+  if(!target||target[key]===value)return;
+  if(editingField!==el){undoStack.push(JSON.stringify(db));if(undoStack.length>30)undoStack.shift();editingField=el;}
+  target[key]=value.slice(0,key==='announcement'?200:30000);persist(key==='announcement');
+}
+document.addEventListener('input',event=>{const el=event.target;if(el.dataset.save)saveField(el);if(el.dataset.dice)diceDraft[el.dataset.dice]=el.value;});
+document.addEventListener('focusout',event=>{if(editingField===event.target)editingField=null;});
 document.addEventListener('click',event=>{const el=event.target.closest('[data-action]');if(el){const handler=actions[el.dataset.action];if(handler)handler(el.dataset);}});
 document.addEventListener('change',event=>{const el=event.target;
   if(el.dataset.dice){diceDraft[el.dataset.dice]=el.value;if(['attacker','target','attackStat'].includes(el.dataset.dice)){const who=el.dataset.dice==='target'?diceDraft.target:diceDraft.attacker;const [type,id]=who.split(':');const x=find(type,id);if(x){const k=el.dataset.dice==='target'?'defenseCount':'attackCount';diceDraft[k]=x[el.dataset.dice==='target'?'defense':diceDraft.attackStat||'melee']??1;}}if(['attackMode','defenseMode','attacker','target','attackStat'].includes(el.dataset.dice))render();}
   if(el.dataset.display)change(()=>db.display[el.dataset.display]=el.checked);
-  if(el.dataset.save==='encounter-note')change(()=>db.encounter.note=el.value.slice(0,30000),'',false);
-  if(el.dataset.save==='announcement')change(()=>db.display.announcement=el.value.slice(0,200),'',false);
-  if(el.dataset.save==='adventure-status')change(()=>{const a=db.adventures.find(x=>x.id===el.dataset.id);if(a)a.status=el.value;},'',false);
+  if(el.dataset.save)saveField(el);
   if(el.id==='backupInput')importFile(el.files?.[0]);
 });
 async function importFile(file) {if(!file)return;try{if(file.size>5*1024*1024)throw Error('Choose a backup smaller than 5 MB.');const next=HK.backup(JSON.parse(await file.text()));if(confirm(`Replace this campaign with “${next.name}”? Your current campaign will be downloaded first.`)){exportBackup();change(()=>db=next,'Backup restored.');}}catch(e){toast('Import failed: '+e.message);}}
